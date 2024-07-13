@@ -14,7 +14,7 @@ import {  searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 import { QUERY_ME } from '../utils/queries';
 
-
+const bookIds = getSavedBookIds()
 const SearchBooks = () => {
   // create state for holding returned google api data
   const [searchedBooks, setSearchedBooks] = useState([]);
@@ -22,7 +22,7 @@ const SearchBooks = () => {
   const [searchInput, setSearchInput] = useState('');
 
   // create state to hold saved bookId values
-  const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
+  const [savedBookIds, setSavedBookIds] = useState([]);
 
   const [SaveBook] = useMutation(SAVE_BOOK, {
     refetchQueries: [QUERY_ME, 'me'],
@@ -31,9 +31,9 @@ const SearchBooks = () => {
 
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
-  useEffect(() => {
-    return () => saveBookIds(savedBookIds);
-  });
+  // useEffect(() => {
+  //   return () => saveBookIds(savedBookIds);
+  // });
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
@@ -81,9 +81,10 @@ const SearchBooks = () => {
 
     try {
        await SaveBook({variables: {newBook: bookToSave}});
-
+      bookIds.push(bookToSave.bookId)
+      setSavedBookIds(bookIds)
       // if book successfully saves to user's account, save book id to state
-      setSavedBookIds([...savedBookIds, bookToSave.bookId]);
+      saveBookIds(bookIds)
     } catch (err) {
       console.error(err);
     }
